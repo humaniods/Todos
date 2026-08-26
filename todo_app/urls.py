@@ -1,23 +1,79 @@
-from django.urls import path
-from .views import (
-    TaskListView, TaskCreateView, TaskUpdateView, TaskDeleteView,
-    register, discord_login, discord_callback  # 👈 Add these imports
-)
 from django.contrib.auth import views as auth_views
+from django.urls import path
+
+from .views import (
+    TaskCreateView,
+    TaskDeleteView,
+    TaskDetailView,
+    TaskListView,
+    TaskUpdateView,
+    announcements_home,
+    audit_home,
+    accept_invitation,
+    dashboard,
+    discord_callback,
+    discord_login,
+    events_home,
+    holidays_home,
+    invitation_create,
+    leave_admin,
+    leave_home,
+    leave_request_decide,
+    membership_offboard,
+    membership_edit,
+    notifications_home,
+    organization_create,
+    people_list,
+    register,
+    switch_organization,
+    task_attachment_upload,
+    team_create,
+    verify_email,
+)
 
 urlpatterns = [
-    # Task Views
-    path('', TaskListView.as_view(), name='task-list'),
-    path('add/', TaskCreateView.as_view(), name='task-add'),
-    path('edit/<int:pk>/', TaskUpdateView.as_view(), name='task-edit'),
-    path('delete/<int:pk>/', TaskDeleteView.as_view(), name='task-delete'),
-
-    # Auth Views
+    path('', dashboard, name='dashboard'),
+    path('organization/create/', organization_create, name='organization-create'),
+    path('organization/switch/<int:organization_id>/', switch_organization, name='organization-switch'),
+    path('invitations/<str:token>/accept/', accept_invitation, name='invitation-accept'),
+    path('verify-email/<str:token>/', verify_email, name='verify-email'),
+    path('people/', people_list, name='people-list'),
+    path('people/<int:pk>/edit/', membership_edit, name='membership-edit'),
+    path('people/<int:pk>/offboard/', membership_offboard, name='membership-offboard'),
+    path('teams/create/', team_create, name='team-create'),
+    path('invitations/create/', invitation_create, name='invitation-create'),
+    path('tasks/', TaskListView.as_view(), name='task-list'),
+    path('tasks/add/', TaskCreateView.as_view(), name='task-add'),
+    path('tasks/<int:pk>/', TaskDetailView.as_view(), name='task-detail'),
+    path('tasks/<int:pk>/attachments/', task_attachment_upload, name='task-attachment-upload'),
+    path('tasks/<int:pk>/edit/', TaskUpdateView.as_view(), name='task-edit'),
+    path('tasks/<int:pk>/delete/', TaskDeleteView.as_view(), name='task-delete'),
+    path('leave/', leave_home, name='leave-home'),
+    path('leave/admin/', leave_admin, name='leave-admin'),
+    path('leave/admin/<int:pk>/decide/', leave_request_decide, name='leave-request-decide'),
+    path('holidays/', holidays_home, name='holidays-home'),
+    path('events/', events_home, name='events-home'),
+    path('announcements/', announcements_home, name='announcements-home'),
+    path('notifications/', notifications_home, name='notifications-home'),
+    path('activity/', audit_home, name='audit-home'),
+    path('password-reset/', auth_views.PasswordResetView.as_view(
+        template_name='tasks/password_reset_form.html',
+        email_template_name='tasks/password_reset_email.txt',
+        success_url='/password-reset/done/',
+    ), name='password_reset'),
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(
+        template_name='tasks/password_reset_done.html'
+    ), name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='tasks/password_reset_confirm.html',
+        success_url='/reset/done/',
+    ), name='password_reset_confirm'),
+    path('reset/done/', auth_views.PasswordResetCompleteView.as_view(
+        template_name='tasks/password_reset_complete.html'
+    ), name='password_reset_complete'),
     path('login/', auth_views.LoginView.as_view(template_name='tasks/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', register, name='register'),
-
-    #  Discord OAuth2
     path('discord/login/', discord_login, name='discord_login'),
     path('discord/callback/', discord_callback, name='discord_callback'),
 ]

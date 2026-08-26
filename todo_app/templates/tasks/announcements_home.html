@@ -1,0 +1,38 @@
+{% extends 'tasks/base.html' %}
+
+{% block content %}
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="h4">Announcements</h2>
+        {% if current_membership.is_hr or current_membership.is_owner %}
+        <form method="post" class="row g-3 mt-1">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="col-12"><label class="form-label">{{ field.label }}</label>{{ field }}</div>
+          {% endfor %}
+          <div class="col-12"><button class="btn btn-primary">Publish Announcement</button></div>
+        </form>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Latest Announcements</h5>
+        {% for announcement in announcements %}
+        <div class="border rounded-3 p-3 mb-3">
+          <div class="fw-semibold">{{ announcement.title }}</div>
+          <div class="small text-muted">{{ announcement.publish_at }}</div>
+          <div class="mt-2">{{ announcement.content }}</div>
+        </div>
+        {% empty %}
+        <p class="text-muted mb-0">No announcements yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

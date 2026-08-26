@@ -1,0 +1,110 @@
+{% extends 'tasks/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-column flex-lg-row gap-3 mb-4">
+  <div>
+    <h2 class="mb-1">{{ current_membership.organization.name }}</h2>
+    <p class="text-muted mb-0">{{ current_membership.role_labels|join:", " }} workspace</p>
+  </div>
+  {% if not current_membership %}
+  <a href="{% url 'organization-create' %}" class="btn btn-primary">Create Organization</a>
+  {% endif %}
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="card summary-card bg-light"><div class="card-body"><div class="text-muted small">Tasks Due Today</div><div class="fs-3 fw-semibold">{{ tasks_due_today }}</div></div></div></div>
+  <div class="col-md-3"><div class="card summary-card border-danger"><div class="card-body"><div class="text-muted small">Overdue Tasks</div><div class="fs-3 fw-semibold">{{ overdue_tasks }}</div></div></div></div>
+  <div class="col-md-3"><div class="card summary-card border-primary"><div class="card-body"><div class="text-muted small">Upcoming Holidays</div><div class="fs-3 fw-semibold">{{ upcoming_holidays|length }}</div></div></div></div>
+  <div class="col-md-3"><div class="card summary-card border-success"><div class="card-body"><div class="text-muted small">Announcements</div><div class="fs-3 fw-semibold">{{ latest_announcements|length }}</div></div></div></div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Recent Tasks</h5>
+        {% for task in recent_tasks %}
+        <div class="border rounded-3 p-3 mb-3">
+          <div class="d-flex justify-content-between gap-2">
+            <a href="{% url 'task-detail' task.id %}" class="fw-semibold text-decoration-none">{{ task.task_key }} {{ task.title }}</a>
+            <span class="badge text-bg-secondary">{{ task.get_status_display }}</span>
+          </div>
+          <div class="text-muted small mt-1">{{ task.get_task_type_display }}{% if task.team %} | {{ task.team.name }}{% endif %}</div>
+        </div>
+        {% empty %}
+        <p class="text-muted mb-0">No tasks yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  {% if not current_membership.is_owner %}
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">Leave Balance</h5>
+        {% for item in leave_summary %}
+        <div class="d-flex justify-content-between border-bottom py-2">
+          <span>{{ item.leave_type.name }}</span>
+          <span>{{ item.available }} available / {{ item.used }} used / {{ item.pending }} pending</span>
+        </div>
+        {% empty %}
+        <p class="text-muted mb-0">No leave types configured.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if current_membership.is_manager or current_membership.is_owner %}
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Manager Overview</h5>
+        <div class="row text-center">
+          <div class="col-3"><div class="fw-semibold">{{ manager_counts.todo }}</div><div class="small text-muted">To Do</div></div>
+          <div class="col-3"><div class="fw-semibold">{{ manager_counts.in_progress }}</div><div class="small text-muted">In Progress</div></div>
+          <div class="col-3"><div class="fw-semibold">{{ manager_counts.blocked }}</div><div class="small text-muted">Blocked</div></div>
+          <div class="col-3"><div class="fw-semibold">{{ manager_counts.done }}</div><div class="small text-muted">Done</div></div>
+        </div>
+        <hr>
+        <h6>Unavailable Today</h6>
+        {% for item in unavailable_members %}
+        <div>{{ item.membership.display_name }} - {{ item.leave_type.name }}</div>
+        {% empty %}
+        <div class="text-muted">No one unavailable today.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if current_membership.is_hr or current_membership.is_owner %}
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">HR Overview</h5>
+        <div>Active employees: {{ hr_counts.active_employees }}</div>
+        <div>Pending leave requests: {{ hr_counts.pending_leave_requests }}</div>
+        <div>Upcoming holidays: {{ hr_counts.upcoming_holidays }}</div>
+        <div>Upcoming events: {{ hr_counts.upcoming_events }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if current_membership.is_owner and owner_counts %}
+  <div class="col-lg-6">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Owner Overview</h5>
+        <div>Active teams: {{ owner_counts.active_teams }}</div>
+        <div>Blocked tasks: {{ owner_counts.blocked_tasks }}</div>
+        <div>Development tasks: {{ owner_counts.development_tasks }}</div>
+        <div>Audit events: {{ owner_counts.audit_events }}</div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

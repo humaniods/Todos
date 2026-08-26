@@ -1,74 +1,130 @@
 {% extends 'tasks/base.html' %}
 
 {% block content %}
-<h2>Your Tasks</h2>
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+  <div>
+    <h2 class="mb-1">My Tasks</h2>
+    <p class="text-muted mb-0">Track general work, development checkpoints, blockers, and completion state.</p>
+  </div>
+  <a href="{% url 'task-add' %}" class="btn btn-success">Create Task</a>
+</div>
 
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="card summary-card bg-light h-100">
+      <div class="card-body">
+        <div class="text-muted small">Total</div>
+        <div class="fs-3 fw-semibold">{{ summary.total }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card summary-card border-warning h-100">
+      <div class="card-body">
+        <div class="text-muted small">To Do</div>
+        <div class="fs-3 fw-semibold">{{ summary.todo }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card summary-card border-primary h-100">
+      <div class="card-body">
+        <div class="text-muted small">In Progress</div>
+        <div class="fs-3 fw-semibold">{{ summary.in_progress }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card summary-card border-danger h-100">
+      <div class="card-body">
+        <div class="text-muted small">Blocked</div>
+        <div class="fs-3 fw-semibold">{{ summary.blocked }}</div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <form method="get" class="row g-3 mb-4">
-  <div class="col-auto">
-    <input type="text" name="q" placeholder="Search..." value="{{ request.GET.q }}" class="form-control">
+  <div class="col-12 col-lg-4">
+    <input type="text" name="q" placeholder="Search title or description" value="{{ request.GET.q }}" class="form-control">
   </div>
-  <div class="col-auto">
+  <div class="col-6 col-lg-2">
     <select name="status" class="form-select">
-      <option value="">All</option>
-      <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
-      <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="">All statuses</option>
+      {% for value, label in status_choices %}
+      <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
     </select>
   </div>
-  <div class="col-auto">
+  <div class="col-6 col-lg-2">
+    <select name="task_type" class="form-select">
+      <option value="">All task types</option>
+      {% for value, label in task_type_choices %}
+      <option value="{{ value }}" {% if request.GET.task_type == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-6 col-lg-2">
     <select name="priority" class="form-select">
-      <option value="">All Priorities</option>
+      <option value="">All priorities</option>
       <option value="Low" {% if request.GET.priority == 'Low' %}selected{% endif %}>Low</option>
       <option value="Medium" {% if request.GET.priority == 'Medium' %}selected{% endif %}>Medium</option>
       <option value="High" {% if request.GET.priority == 'High' %}selected{% endif %}>High</option>
     </select>
   </div>
-  <div class="col-auto">
+  <div class="col-6 col-lg-2 d-grid">
     <button type="submit" class="btn btn-primary">Filter</button>
-    <a href="{% url 'task-add' %}" class="btn btn-success">+ Add Task</a>
   </div>
 </form>
 
-<table class="table table-bordered">
-<thead>
-<tr>
-  <th>Title</th>
-  <th>Priority</th>
-  <th>Due Date</th>
-  <th>Status</th>
-  <th>Actions</th>
-</tr>
-</thead>
-<tbody>
-{% for task in object_list %}
-<tr>
-  <td>{{ task.title }}</td>
-  <td>{{ task.priority }}</td>
-  <td>{{ task.due_date }}</td>
-  <td>
-    {% if task.completed %}
-      ✅ Completed
-    {% else %}
-      ❌ Pending
-    {% endif %}
-  </td>
-  <td>
-    <a href="{% url 'task-edit' task.id %}" class="btn btn-warning btn-sm">Edit</a>
-    <a href="{% url 'task-delete' task.id %}" class="btn btn-danger btn-sm">Delete</a>
-  </td>
-</tr>
-{% empty %}
-<tr>
-  <td colspan="5">No tasks found.</td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+<div class="table-responsive">
+  <table class="table table-hover data-table">
+    <thead>
+      <tr>
+        <th>Task</th>
+        <th>Type</th>
+        <th>Status</th>
+        <th>Checkpoint</th>
+        <th>Assignee</th>
+        <th>Due</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for task in object_list %}
+      <tr>
+        <td>
+          <div class="fw-semibold">{{ task.title }}</div>
+          <div class="text-muted small">{{ task.priority }} priority</div>
+        </td>
+        <td>{{ task.get_task_type_display }}</td>
+        <td>
+          <span class="badge text-bg-{% if task.status == 'done' %}success{% elif task.status == 'blocked' %}danger{% elif task.status == 'in_progress' %}primary{% else %}secondary{% endif %}">
+            {{ task.get_status_display }}
+          </span>
+        </td>
+        <td>{% if task.progress_stage %}{{ task.get_progress_stage_display }}{% else %}<span class="text-muted">Not set</span>{% endif %}</td>
+        <td>{{ task.primary_assignee.username }}</td>
+        <td>{% if task.due_date %}{{ task.due_date }}{% else %}<span class="text-muted">No due date</span>{% endif %}</td>
+        <td class="text-nowrap">
+          <a href="{% url 'task-detail' task.id %}" class="btn btn-outline-primary btn-sm">View</a>
+          <a href="{% url 'task-edit' task.id %}" class="btn btn-outline-warning btn-sm">Edit</a>
+          <a href="{% url 'task-delete' task.id %}" class="btn btn-outline-danger btn-sm">Delete</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="text-center py-4">No tasks match the current filters.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 
-<div>
+<div class="mt-3">
   {% if is_paginated %}
     <nav>
-      <ul class="pagination">
+      <ul class="pagination mb-0">
         {% if page_obj.has_previous %}
           <li class="page-item">
             <a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a>

@@ -1,0 +1,64 @@
+{% extends 'tasks/base.html' %}
+
+{% block content %}
+<div class="mb-4">
+  <h2 class="mb-1">Leave</h2>
+  <p class="text-muted mb-0">View balances, submit requests, and track approvals.</p>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Request Leave</h5>
+        <form method="post" class="row g-3">
+          {% csrf_token %}
+          {% for field in form %}
+          <div class="col-12">
+            <label class="form-label">{{ field.label }}</label>
+            {{ field }}
+            {% for error in field.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+          </div>
+          {% endfor %}
+          <div class="col-12"><button class="btn btn-primary">Submit Request</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-7">
+    <div class="card mb-4">
+      <div class="card-body">
+        <h5 class="card-title">Balance Summary</h5>
+        {% for item in balances %}
+        <div class="d-flex justify-content-between border-bottom py-2">
+          <span>{{ item.leave_type.name }}</span>
+          <span>{{ item.available }} available / {{ item.used }} used / {{ item.pending }} pending</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">My Requests</h5>
+        <div class="table-responsive">
+          <table class="table data-table">
+            <thead><tr><th>Type</th><th>Dates</th><th>Status</th><th>Approver</th></tr></thead>
+            <tbody>
+              {% for request in requests %}
+              <tr>
+                <td>{{ request.leave_type.name }}</td>
+                <td>{{ request.start_date }} to {{ request.end_date }}</td>
+                <td>{{ request.get_status_display }}</td>
+                <td>{{ request.approver.display_name|default:"-" }}</td>
+              </tr>
+              {% empty %}
+              <tr><td colspan="4">No leave requests yet.</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

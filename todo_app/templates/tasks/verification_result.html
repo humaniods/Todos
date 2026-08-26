@@ -1,0 +1,17 @@
+{% extends 'tasks/auth_base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 420px; margin: 0 auto;">
+  <div class="card-body text-center">
+    {% if success %}
+    <h2 class="card-title mb-3">Email Verified</h2>
+    <p>Your account is ready.</p>
+    <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
+    {% else %}
+    <h2 class="card-title mb-3">Invalid Link</h2>
+    <p>This verification link is expired or already used.</p>
+    <a href="{% url 'register' %}" class="btn btn-primary">Register Again</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

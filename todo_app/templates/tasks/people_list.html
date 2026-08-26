@@ -1,0 +1,70 @@
+{% extends 'tasks/base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-start flex-column flex-lg-row gap-3 mb-4">
+  <div>
+    <h2 class="mb-1">People and Teams</h2>
+    <p class="text-muted mb-0">Membership, reporting lines, invitations, and team ownership.</p>
+  </div>
+  <div class="d-flex gap-2">
+    {% if current_membership.is_owner %}
+    <a href="{% url 'team-create' %}" class="btn btn-outline-dark">Create Team</a>
+    {% endif %}
+    {% if current_membership.is_hr or current_membership.is_owner %}
+    <a href="{% url 'invitation-create' %}" class="btn btn-primary">Invite Member</a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="row g-4">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Directory</h5>
+        <div class="table-responsive">
+          <table class="table data-table">
+            <thead><tr><th>Name</th><th>Roles</th><th>Manager</th><th>Status</th><th></th></tr></thead>
+            <tbody>
+              {% for member in members %}
+              <tr>
+                <td>{{ member.display_name }}<div class="small text-muted">{{ member.user.email }}</div></td>
+                <td>{{ member.role_labels|join:", " }}</td>
+                <td>{% if member.reporting_manager %}{{ member.reporting_manager.display_name }}{% else %}<span class="text-muted">None</span>{% endif %}</td>
+                <td>{% if member.active %}Active{% else %}Inactive{% endif %}</td>
+                <td class="text-nowrap">
+                  {% if current_membership.is_hr or current_membership.is_owner %}<a href="{% url 'membership-edit' member.id %}" class="btn btn-outline-warning btn-sm">Edit</a>{% endif %}
+                  {% if current_membership.is_hr or current_membership.is_owner %}<a href="{% url 'membership-offboard' member.id %}" class="btn btn-outline-danger btn-sm">Offboard</a>{% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">Teams</h5>
+        {% for team in teams %}
+        <div class="border rounded-3 p-3 mb-3">
+          <div class="fw-semibold">{{ team.name }}</div>
+          <div class="small text-muted">Manager: {{ team.manager.display_name|default:"Unassigned" }}</div>
+          <div class="small mt-2">
+            {% for member in team.members.all %}
+            <span class="badge text-bg-light">{{ member.display_name }}</span>
+            {% empty %}
+            <span class="text-muted">No members yet.</span>
+            {% endfor %}
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted mb-0">No teams created yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
