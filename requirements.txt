@@ -16,8 +16,10 @@ pillow==11.3.0
 prompt_toolkit==3.0.51
 python-dateutil==2.9.0.post0
 redis==6.2.0
+requests>=2.32.0,<3
 six==1.17.0
 sqlparse==0.5.3
+streamlit>=1.37,<2
 typing_extensions==4.14.1
 tzdata==2025.2
 vine==5.1.0

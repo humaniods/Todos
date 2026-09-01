@@ -95,8 +95,8 @@ LOGIN_REDIRECT_URL = '/'      # if we login we will be redirected to this url
 LOGOUT_REDIRECT_URL = '/login/'      # if we logout we will be redirected to this url
 
 # Discord OAuth2
-DISCORD_CLIENT_ID = "1397477069398474763"
-DISCORD_CLIENT_SECRET = "9j2vQJ1li7-ZZdrC7LpgyrvlSXgVILeu"
-DISCORD_REDIRECT_URI = "http://16.171.28.253:8000/discord/callback/"
+DISCORD_CLIENT_ID = os.getenv('DISCORD_CLIENT_ID', '')
+DISCORD_CLIENT_SECRET = os.getenv('DISCORD_CLIENT_SECRET', '')
+DISCORD_REDIRECT_URI = os.getenv('DISCORD_REDIRECT_URI', 'http://localhost:8000/discord/callback/')
 DISCORD_API_BASE_URL = "https://discord.com/api"
 DISCORD_SCOPE = "identify email"

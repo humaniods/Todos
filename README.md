@@ -2,6 +2,34 @@
 
 OfficeDiary is a Django-based modular monolith for organization-scoped work management, leave administration, holidays, events, announcements, notifications, and audit activity.
 
+## Streamlit live app
+
+This repo now also includes a Streamlit entrypoint: `streamlit_app.py`.
+
+Local run:
+
+```bash
+pip install -r requirements.txt
+streamlit run streamlit_app.py
+```
+
+The Streamlit app bootstraps Django automatically, runs migrations on first launch, and seeds the demo organization if the database is empty.
+
+### Streamlit Community Cloud deployment
+
+1. Push this repository to GitHub.
+2. In Streamlit Community Cloud, create a new app from the repo.
+3. Set the main file path to `streamlit_app.py`.
+4. Deploy. No extra start command is required.
+
+Optional environment variables for Discord OAuth:
+
+```text
+DISCORD_CLIENT_ID=
+DISCORD_CLIENT_SECRET=
+DISCORD_REDIRECT_URI=
+```
+
 ## Included product areas
 
 - Authentication, organization onboarding, and invitations
