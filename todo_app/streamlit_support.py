@@ -1,8 +1,34 @@
 import os
+import tempfile
 from datetime import timedelta
 
 
+def configure_streamlit_environment():
+    if 'SQLITE_PATH' not in os.environ:
+        os.environ['SQLITE_PATH'] = os.path.join(tempfile.gettempdir(), 'officediary-streamlit.sqlite3')
+
+    try:
+        import streamlit as st
+    except Exception:
+        return
+
+    secret_keys = [
+        'DJANGO_SECRET_KEY',
+        'DJANGO_DEBUG',
+        'DJANGO_ALLOWED_HOSTS',
+        'SQLITE_PATH',
+        'DISCORD_CLIENT_ID',
+        'DISCORD_CLIENT_SECRET',
+        'DISCORD_REDIRECT_URI',
+    ]
+    for key in secret_keys:
+        value = st.secrets.get(key)
+        if value not in (None, '') and key not in os.environ:
+            os.environ[key] = str(value)
+
+
 def bootstrap_django():
+    configure_streamlit_environment()
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'todo_project.settings')
 
     import django

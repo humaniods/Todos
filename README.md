@@ -17,18 +17,32 @@ The Streamlit app bootstraps Django automatically, runs migrations on first laun
 
 ### Streamlit Community Cloud deployment
 
-1. Push this repository to GitHub.
-2. In Streamlit Community Cloud, create a new app from the repo.
-3. Set the main file path to `streamlit_app.py`.
-4. Deploy. No extra start command is required.
+1. Push this repository to GitHub at `https://github.com/humaniods/Todos`.
+2. Open Streamlit Community Cloud and choose `Create app`.
+3. Select repo `humaniods/Todos`, branch `main`, and main file path `streamlit_app.py`.
+4. Optional: open `Advanced settings` and select Python `3.12` before first deploy.
+5. In the app `Secrets` panel, add the keys from `.streamlit/secrets.toml.example` if you want custom Django or Discord settings.
+6. Deploy. The app boots Django automatically, reads Streamlit secrets into Django settings, runs migrations, and seeds demo data on first launch.
 
-Optional environment variables for Discord OAuth:
+Optional secrets for Discord OAuth:
 
 ```text
 DISCORD_CLIENT_ID=
 DISCORD_CLIENT_SECRET=
 DISCORD_REDIRECT_URI=
 ```
+
+Recommended secrets for production-like Streamlit runs:
+
+```text
+DJANGO_SECRET_KEY=<long-random-value>
+DJANGO_DEBUG=0
+DJANGO_ALLOWED_HOSTS=*
+```
+
+Database note:
+
+- If `SQLITE_PATH` is not set, the Streamlit app stores SQLite data in `/tmp/officediary-streamlit.sqlite3`, which is safer for Streamlit Community Cloud's ephemeral filesystem.
 
 ## Included product areas
 
