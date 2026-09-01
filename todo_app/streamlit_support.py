@@ -129,8 +129,6 @@ def create_task(
     from todo_app.models import Membership, Task, Team
     from todo_app.services import create_audit_log, create_notification, next_task_key, record_task_activity
 
-    collaborator_membership_ids = collaborator_membership_ids or []
-
     with transaction.atomic():
         actor = Membership.objects.select_related('organization', 'user').get(pk=actor_membership_id, organization_id=organization_id)
         assignee = Membership.objects.select_related('user').get(pk=assignee_membership_id, organization_id=organization_id)
@@ -151,16 +149,6 @@ def create_task(
             task_type=task_type,
             status='todo',
         )
-        if collaborator_membership_ids:
-            collaborators = list(
-                Membership.objects.filter(
-                    pk__in=collaborator_membership_ids,
-                    organization_id=organization_id,
-                    active=True,
-                ).select_related('user')
-            )
-            task.collaborator_memberships.set(collaborators)
-            task.collaborators.set([member.user for member in collaborators])
         record_task_activity(task, actor, '', '', 'Task created from Streamlit workspace.')
         create_notification(
             assignee,

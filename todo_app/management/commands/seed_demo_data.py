@@ -514,7 +514,6 @@ class Command(BaseCommand):
                     )
                 task.save()
             task.collaborators.set([member.user for member in spec["collaborators"]])
-            task.collaborator_memberships.set(spec["collaborators"])
             if not task.comments.filter(body=spec["comment"]).exists():
                 TaskComment.objects.create(task=task, author=manager.user, body=spec["comment"])
             if not task.activities.filter(

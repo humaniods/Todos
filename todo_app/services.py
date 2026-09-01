@@ -182,7 +182,7 @@ def create_membership_from_invitation(invitation, user):
 def visible_tasks_for_membership(membership):
     queryset = Task.objects.filter(organization=membership.organization).select_related(
         'organization', 'team', 'primary_assignee', 'primary_membership', 'user'
-    ).prefetch_related('collaborators', 'tags')
+    )
     if membership.is_owner:
         return queryset
     if membership.is_manager:
@@ -192,12 +192,10 @@ def visible_tasks_for_membership(membership):
             | Q(primary_membership=membership)
             | Q(primary_membership__reporting_manager=membership)
             | Q(primary_assignee=membership.user)
-            | Q(collaborators=membership.user)
         ).distinct()
     return queryset.filter(
         Q(primary_membership=membership)
         | Q(primary_assignee=membership.user)
-        | Q(collaborators=membership.user)
     ).distinct()
 
 

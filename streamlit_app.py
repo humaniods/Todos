@@ -296,16 +296,10 @@ def main():
                 start_date = date_cols[0].date_input('Start date', value=None)
                 due_date = date_cols[1].date_input('Due date', value=None)
                 expected_next_update = date_cols[2].date_input('Expected next update', value=None)
-                extra_cols = st.columns(2)
-                team = extra_cols[0].selectbox(
+                team = st.selectbox(
                     'Team',
                     options=task_team_options,
                     format_func=lambda team_obj: 'No team' if team_obj is None else team_obj.name,
-                )
-                collaborators = extra_cols[1].multiselect(
-                    'Collaborators',
-                    options=[member for member in members if member.id != assignee.id],
-                    format_func=lambda member: member.display_name,
                 )
                 if st.form_submit_button('Create task', use_container_width=True):
                     if not title.strip():
@@ -323,7 +317,6 @@ def main():
                             start_date=start_date,
                             expected_next_update=expected_next_update,
                             team_id=team.id if team else None,
-                            collaborator_membership_ids=[member.id for member in collaborators],
                         )
                         st.success('Task create ho gaya.')
                         st.rerun()
