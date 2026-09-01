@@ -75,7 +75,7 @@ def organization_snapshot(organization_id, viewer_membership_id):
         visible_tasks_for_membership(viewer)
         .filter(organization=organization)
         .select_related('team', 'primary_membership', 'user')
-        .prefetch_related('collaborator_memberships', 'comments', 'activities')
+        .prefetch_related('comments', 'activities')
         .distinct()
     )
     status_counts = list(

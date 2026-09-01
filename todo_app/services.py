@@ -182,14 +182,23 @@ def create_membership_from_invitation(invitation, user):
 def visible_tasks_for_membership(membership):
     queryset = Task.objects.filter(organization=membership.organization).select_related(
         'organization', 'team', 'primary_assignee', 'primary_membership', 'user'
-    ).prefetch_related('collaborators', 'collaborator_memberships', 'tags')
+    ).prefetch_related('collaborators', 'tags')
     if membership.is_owner:
         return queryset
     if membership.is_manager:
         team_ids = membership.managed_teams.values_list('id', flat=True)
-        member_team_ids = membership.teams.values_list('id', flat=True)
-        return queryset.filter(team_id__in=list(set(team_ids) | set(member_team_ids))).distinct()
-    return queryset.filter(Q(primary_membership=membership) | Q(collaborator_memberships=membership)).distinct()
+        return queryset.filter(
+            Q(team_id__in=team_ids)
+            | Q(primary_membership=membership)
+            | Q(primary_membership__reporting_manager=membership)
+            | Q(primary_assignee=membership.user)
+            | Q(collaborators=membership.user)
+        ).distinct()
+    return queryset.filter(
+        Q(primary_membership=membership)
+        | Q(primary_assignee=membership.user)
+        | Q(collaborators=membership.user)
+    ).distinct()
 
 
 def leave_balance_summary(membership):
