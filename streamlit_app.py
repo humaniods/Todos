@@ -1,4 +1,5 @@
 from collections import Counter
+from datetime import date
 
 import streamlit as st
 
@@ -120,6 +121,25 @@ def render_metric(label, value, note):
             <div class="metric-label">{label}</div>
             <div class="metric-value">{value}</div>
             <div class="metric-note">{note}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_meta_card(column, label, value):
+    if isinstance(value, date):
+        display_value = value.strftime('%d %b %Y')
+    else:
+        display_value = str(value)
+
+    column.markdown(
+        f"""
+        <div class="metric-card">
+            <div class="metric-label">{label}</div>
+            <div class="metric-note" style="font-size: 1rem; margin-top: 0.5rem; color: var(--ink);">
+                {display_value}
+            </div>
         </div>
         """,
         unsafe_allow_html=True,
@@ -314,10 +334,14 @@ def main():
                 with st.expander(f'{task.task_key} · {task.title} · {status_map.get(task.status, task.status)}', expanded=False):
                     st.write(task.description or 'No description')
                     meta_cols = st.columns(4)
-                    meta_cols[0].metric('Assignee', task.primary_membership.display_name if task.primary_membership else task.primary_assignee.username)
-                    meta_cols[1].metric('Priority', task.priority)
-                    meta_cols[2].metric('Due date', task.due_date or 'Not set')
-                    meta_cols[3].metric('Team', task.team.name if task.team else 'No team')
+                    render_meta_card(
+                        meta_cols[0],
+                        'Assignee',
+                        task.primary_membership.display_name if task.primary_membership else task.primary_assignee.username,
+                    )
+                    render_meta_card(meta_cols[1], 'Priority', task.priority)
+                    render_meta_card(meta_cols[2], 'Due date', task.due_date or 'Not set')
+                    render_meta_card(meta_cols[3], 'Team', task.team.name if task.team else 'No team')
                     with st.form(f'update-task-{task.id}'):
                         form_cols = st.columns(3)
                         status = form_cols[0].selectbox(
