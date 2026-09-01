@@ -184,7 +184,6 @@ def main():
     org_members = list(
         Membership.objects.filter(organization=organization, active=True)
         .select_related('user', 'reporting_manager')
-        .prefetch_related('teams')
         .order_by('display_name')
     )
     viewer_index = st.sidebar.selectbox(
@@ -447,7 +446,6 @@ def main():
                     'Username': member.user.username,
                     'Roles': ', '.join(role for role, enabled in [('Owner', member.is_owner), ('HR', member.is_hr), ('Manager', member.is_manager), ('Employee', member.is_employee)] if enabled),
                     'Manager': member.reporting_manager.display_name if member.reporting_manager else '-',
-                    'Teams': ', '.join(team.name for team in member.teams.all()) or '-',
                 }
                 for member in members
             ],

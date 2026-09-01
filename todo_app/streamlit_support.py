@@ -64,13 +64,11 @@ def organization_snapshot(organization_id, viewer_membership_id):
     )
     viewer = (
         Membership.objects.select_related('user', 'organization', 'reporting_manager')
-        .prefetch_related('teams')
         .get(pk=viewer_membership_id, organization_id=organization_id)
     )
     members = list(
         organization.memberships.filter(active=True)
         .select_related('user', 'reporting_manager')
-        .prefetch_related('teams')
         .order_by('display_name')
     )
     tasks = list(
